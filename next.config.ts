@@ -11,9 +11,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ["source-map"],
-  },
 };
 
 export default nextConfig;

@@ -11,15 +11,14 @@
     "axios": "^1.12.2",
     "dexie": "^4.2.0",
     "lucide-react": "^0.544.0",
-    "next": "15.5.4",
+    "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-toastify": "^11.0.5",
-    "source-map": "^0.7.6",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/next": "^9.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
