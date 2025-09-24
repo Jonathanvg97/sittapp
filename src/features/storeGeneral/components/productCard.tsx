@@ -1,16 +1,22 @@
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { Product } from "../types/product.interface";
+import { useRouter } from "next/navigation";
 
 type ProductCardProps = {
   products: Product[];
 };
 
 export const ProductCard = ({ products }: ProductCardProps) => {
+  //hooks
+  const router = useRouter();
+  //
   return (
     <>
       {products?.map((product) => (
         <article
+          role="button"
+          onClick={() => router.push(`/product/${product?.id}`)}
           key={product?.id}
           className="ProductCard text-black w-full h-full flex flex-col rounded-lg shadow-md bg-white hover:shadow-lg transition-shadow duration-300 cursor-pointer "
         >

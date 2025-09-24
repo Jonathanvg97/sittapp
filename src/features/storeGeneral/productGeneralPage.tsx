@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { storeGeneral } from "../store/storeGeneral.store";
 import { Funnel, Search } from "lucide-react";
-import { useProducts } from "../hooks/useProducts";
 import { useState } from "react";
-import { ProductCard } from "../components/productCard";
-import { ProductCardSkeleton } from "../components/productCardSkeleton";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Pagination } from "../components/pagination";
-
+import { storeGeneral } from "./store/storeGeneral.store";
+import { useProducts } from "./hooks/useProducts";
+import { ProductCardSkeleton } from "./components/productCardSkeleton";
+import { ProductCard } from "./components/productCard";
+import { Pagination } from "./components/pagination";
 export const ProductGeneralPage = () => {
   //store
   const { products, categories, loadingProducts } = storeGeneral();
   //hooks
   const { getAllProducts, getAllCategories, page, setPage, totalPages } =
     useProducts();
+
   //states
   const [filteredAplied, setFilteredAplied] = useState<{
     category: string;

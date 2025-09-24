@@ -1,4 +1,4 @@
-import { ProductGeneralPage } from "@/features/storeGeneral/page/productGeneralPage";
+import { ProductGeneralPage } from "@/features/storeGeneral/productGeneralPage";
 import { ToastContainer } from "react-toastify";
 
 export default function Home() {
