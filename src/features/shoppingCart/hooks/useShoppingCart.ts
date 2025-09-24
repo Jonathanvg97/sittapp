@@ -1,36 +1,31 @@
-"use client"; // importante para que todo sea client component
-
-import { useEffect } from "react";
+"use client";
 import { ProductsShoppingCart } from "@/features/storeGeneral/types/product.interface";
 import { shoppingCartStore } from "../store/shoppingCart.store";
 import { toast } from "react-toastify";
-import { getDb } from "@/config/db";
+import db from "@/config/db";
+import { useEffect } from "react";
 
 export const useShoppingCart = () => {
+  //store
   const { products, setProducts } = shoppingCartStore();
 
   useEffect(() => {
-    const loadProductsFromDB = async () => {
-      const db = getDb();
-      if (!db) return;
-
-      try {
-        const dbProducts = await db.productShoppingCart.toArray();
-        setProducts(dbProducts);
-      } catch (error) {
-        console.error("Error loading products from DB:", error);
-        toast.error("Error al cargar el carrito");
-      }
-    };
-
     loadProductsFromDB();
   }, []);
 
-  const saveProductsToDB = async (updatedProducts: ProductsShoppingCart[]) => {
-    const db = getDb();
-    if (!db) return;
-
+  const loadProductsFromDB = async () => {
     try {
+      const dbProducts = await db.productShoppingCart.toArray();
+      setProducts(dbProducts);
+    } catch (error) {
+      console.error("Error loading products from DB:", error);
+      toast.error("Error al cargar el carrito");
+    }
+  };
+
+  const saveProductsToDB = async (updatedProducts: ProductsShoppingCart[]) => {
+    try {
+      // Limpiar la tabla y guardar los nuevos productos
       await db.productShoppingCart.clear();
       if (updatedProducts.length > 0) {
         await db.productShoppingCart.bulkAdd(updatedProducts);
@@ -42,54 +37,95 @@ export const useShoppingCart = () => {
   };
 
   const addProductShoppingCart = async (product: ProductsShoppingCart) => {
-    const currentProducts = products;
-    const existingProduct = currentProducts.find((p) => p.id === product.id);
+    try {
+      // Obtener productos actuales del store
+      const currentProducts = products;
+      const existingProduct = currentProducts.find((p) => p.id === product.id);
 
-    let updatedProducts: ProductsShoppingCart[];
-    if (existingProduct) {
-      updatedProducts = currentProducts.map((p) =>
-        p.id === product.id
-          ? { ...p, quantity: p.quantity + product.quantity }
-          : p
+      let updatedProducts: ProductsShoppingCart[];
+
+      if (existingProduct) {
+        // Aumenta la cantidad si ya existe
+        updatedProducts = currentProducts.map((p) =>
+          p.id === product.id
+            ? { ...p, quantity: p.quantity + product.quantity }
+            : p
+        );
+      } else {
+        // Agrega como nuevo producto
+        updatedProducts = [...currentProducts, product];
+      }
+
+      // Actualizar store y Base de Datos
+      setProducts(updatedProducts);
+      await saveProductsToDB(updatedProducts);
+
+      toast.success(
+        existingProduct
+          ? `Se aumentó la cantidad del producto ${product.title} en el carrito`
+          : "Producto agregado al carrito"
       );
-    } else {
-      updatedProducts = [...currentProducts, product];
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      toast.error("Error al agregar producto al carrito");
     }
-
-    setProducts(updatedProducts);
-    await saveProductsToDB(updatedProducts);
-
-    toast.success(
-      existingProduct
-        ? `Se aumentó la cantidad del producto ${product.title} en el carrito`
-        : "Producto agregado al carrito"
-    );
   };
 
   const decrementProductShoppingCart = async (productId: number) => {
-    const currentProducts = products;
-    const existingProduct = currentProducts.find((p) => p.id === productId);
-    if (!existingProduct) return;
+    try {
+      // Obtener productos actuales del store
+      const currentProducts = products;
+      const existingProduct = currentProducts.find((p) => p.id === productId);
 
-    let updatedProducts: ProductsShoppingCart[];
-    if (existingProduct.quantity > 1) {
-      updatedProducts = currentProducts.map((p) =>
-        p.id === productId ? { ...p, quantity: p.quantity - 1 } : p
+      if (!existingProduct) {
+        toast.error("Producto no encontrado en el carrito");
+        return;
+      }
+
+      let updatedProducts: ProductsShoppingCart[];
+
+      if (existingProduct.quantity > 1) {
+        // Disminuir cantidad si es mayor a 1
+        updatedProducts = currentProducts.map((p) =>
+          p.id === productId ? { ...p, quantity: p.quantity - 1 } : p
+        );
+      } else {
+        // Eliminar producto si la cantidad es 1
+        updatedProducts = currentProducts.filter((p) => p.id !== productId);
+      }
+
+      // Actualizar store y Base de Datos
+      setProducts(updatedProducts);
+      await saveProductsToDB(updatedProducts);
+
+      toast.info(
+        existingProduct.quantity > 1
+          ? `Se disminuyó la cantidad de ${existingProduct.title}`
+          : `Se eliminó ${existingProduct.title} del carrito`
       );
-    } else {
-      updatedProducts = currentProducts.filter((p) => p.id !== productId);
+    } catch (error) {
+      console.error("Error decrementing product quantity:", error);
     }
-
-    setProducts(updatedProducts);
-    await saveProductsToDB(updatedProducts);
   };
 
   const removeProductFromCart = async (productId: number) => {
-    const currentProducts = products;
-    const updatedProducts = currentProducts.filter((p) => p.id !== productId);
+    try {
+      // Obtener productos actuales del store
+      const currentProducts = products;
+      const existingProduct = currentProducts.find((p) => p.id === productId);
 
-    setProducts(updatedProducts);
-    await saveProductsToDB(updatedProducts);
+      if (existingProduct) {
+        const updatedProducts = currentProducts.filter(
+          (p) => p.id !== productId
+        );
+
+        // Actualizar store y Base de Datos
+        setProducts(updatedProducts);
+        await saveProductsToDB(updatedProducts);
+      }
+    } catch (error) {
+      console.error("Error removing product from cart:", error);
+    }
   };
 
   return {
