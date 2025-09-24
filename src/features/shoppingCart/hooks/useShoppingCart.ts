@@ -1,31 +1,36 @@
+"use client"; // importante para que todo sea client component
+
+import { useEffect } from "react";
 import { ProductsShoppingCart } from "@/features/storeGeneral/types/product.interface";
 import { shoppingCartStore } from "../store/shoppingCart.store";
 import { toast } from "react-toastify";
-import db from "@/config/db";
-import { useEffect } from "react";
+import { getDb } from "@/config/db";
 
 export const useShoppingCart = () => {
-  //store
   const { products, setProducts } = shoppingCartStore();
 
-
   useEffect(() => {
+    const loadProductsFromDB = async () => {
+      const db = getDb();
+      if (!db) return;
+
+      try {
+        const dbProducts = await db.productShoppingCart.toArray();
+        setProducts(dbProducts);
+      } catch (error) {
+        console.error("Error loading products from DB:", error);
+        toast.error("Error al cargar el carrito");
+      }
+    };
+
     loadProductsFromDB();
   }, []);
 
-  const loadProductsFromDB = async () => {
-    try {
-      const dbProducts = await db.productShoppingCart.toArray();
-      setProducts(dbProducts);
-    } catch (error) {
-      console.error("Error loading products from DB:", error);
-      toast.error("Error al cargar el carrito");
-    }
-  };
-
   const saveProductsToDB = async (updatedProducts: ProductsShoppingCart[]) => {
+    const db = getDb();
+    if (!db) return;
+
     try {
-      // Limpiar la tabla y guardar los nuevos productos
       await db.productShoppingCart.clear();
       if (updatedProducts.length > 0) {
         await db.productShoppingCart.bulkAdd(updatedProducts);
@@ -37,95 +42,54 @@ export const useShoppingCart = () => {
   };
 
   const addProductShoppingCart = async (product: ProductsShoppingCart) => {
-    try {
-      // Obtener productos actuales del store
-      const currentProducts = products;
-      const existingProduct = currentProducts.find((p) => p.id === product.id);
+    const currentProducts = products;
+    const existingProduct = currentProducts.find((p) => p.id === product.id);
 
-      let updatedProducts: ProductsShoppingCart[];
-
-      if (existingProduct) {
-        // Aumenta la cantidad si ya existe
-        updatedProducts = currentProducts.map((p) =>
-          p.id === product.id
-            ? { ...p, quantity: p.quantity + product.quantity }
-            : p
-        );
-      } else {
-        // Agrega como nuevo producto
-        updatedProducts = [...currentProducts, product];
-      }
-
-      // Actualizar store y Base de Datos
-      setProducts(updatedProducts);
-      await saveProductsToDB(updatedProducts);
-
-      toast.success(
-        existingProduct
-          ? `Se aumentó la cantidad del producto ${product.title} en el carrito`
-          : "Producto agregado al carrito"
+    let updatedProducts: ProductsShoppingCart[];
+    if (existingProduct) {
+      updatedProducts = currentProducts.map((p) =>
+        p.id === product.id
+          ? { ...p, quantity: p.quantity + product.quantity }
+          : p
       );
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-      toast.error("Error al agregar producto al carrito");
+    } else {
+      updatedProducts = [...currentProducts, product];
     }
+
+    setProducts(updatedProducts);
+    await saveProductsToDB(updatedProducts);
+
+    toast.success(
+      existingProduct
+        ? `Se aumentó la cantidad del producto ${product.title} en el carrito`
+        : "Producto agregado al carrito"
+    );
   };
 
   const decrementProductShoppingCart = async (productId: number) => {
-    try {
-      // Obtener productos actuales del store
-      const currentProducts = products;
-      const existingProduct = currentProducts.find((p) => p.id === productId);
+    const currentProducts = products;
+    const existingProduct = currentProducts.find((p) => p.id === productId);
+    if (!existingProduct) return;
 
-      if (!existingProduct) {
-        toast.error("Producto no encontrado en el carrito");
-        return;
-      }
-
-      let updatedProducts: ProductsShoppingCart[];
-
-      if (existingProduct.quantity > 1) {
-        // Disminuir cantidad si es mayor a 1
-        updatedProducts = currentProducts.map((p) =>
-          p.id === productId ? { ...p, quantity: p.quantity - 1 } : p
-        );
-      } else {
-        // Eliminar producto si la cantidad es 1
-        updatedProducts = currentProducts.filter((p) => p.id !== productId);
-      }
-
-      // Actualizar store y Base de Datos
-      setProducts(updatedProducts);
-      await saveProductsToDB(updatedProducts);
-
-      toast.info(
-        existingProduct.quantity > 1
-          ? `Se disminuyó la cantidad de ${existingProduct.title}`
-          : `Se eliminó ${existingProduct.title} del carrito`
+    let updatedProducts: ProductsShoppingCart[];
+    if (existingProduct.quantity > 1) {
+      updatedProducts = currentProducts.map((p) =>
+        p.id === productId ? { ...p, quantity: p.quantity - 1 } : p
       );
-    } catch (error) {
-      console.error("Error decrementing product quantity:", error);
+    } else {
+      updatedProducts = currentProducts.filter((p) => p.id !== productId);
     }
+
+    setProducts(updatedProducts);
+    await saveProductsToDB(updatedProducts);
   };
 
   const removeProductFromCart = async (productId: number) => {
-    try {
-      // Obtener productos actuales del store
-      const currentProducts = products;
-      const existingProduct = currentProducts.find((p) => p.id === productId);
+    const currentProducts = products;
+    const updatedProducts = currentProducts.filter((p) => p.id !== productId);
 
-      if (existingProduct) {
-        const updatedProducts = currentProducts.filter(
-          (p) => p.id !== productId
-        );
-
-        // Actualizar store y Base de Datos
-        setProducts(updatedProducts);
-        await saveProductsToDB(updatedProducts);
-      }
-    } catch (error) {
-      console.error("Error removing product from cart:", error);
-    }
+    setProducts(updatedProducts);
+    await saveProductsToDB(updatedProducts);
   };
 
   return {
