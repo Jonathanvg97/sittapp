@@ -2,7 +2,7 @@
 import { ProductsShoppingCart } from "@/features/storeGeneral/types/product.interface";
 import { shoppingCartStore } from "../store/shoppingCart.store";
 import { toast } from "react-toastify";
-import db from "@/config/db";
+import db from "@/config/db.client";
 import { useEffect } from "react";
 
 export const useShoppingCart = () => {
