@@ -11,6 +11,7 @@ type CardDetailProps = {
 export const CardDetailProduct = (product: CardDetailProps) => {
   //hooks
   const router = useRouter();
+
   //states
   const [quantity, setQuantity] = useState<number>(1);
 

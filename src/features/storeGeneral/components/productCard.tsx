@@ -2,6 +2,7 @@ import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { Product } from "../types/product.interface";
 import { useRouter } from "next/navigation";
+import { useShoppingCart } from "@/features/shoppingCart/hooks/useShoppingCart";
 
 type ProductCardProps = {
   products: Product[];
@@ -10,6 +11,7 @@ type ProductCardProps = {
 export const ProductCard = ({ products }: ProductCardProps) => {
   //hooks
   const router = useRouter();
+  const { addProductShoppingCart } = useShoppingCart();
   //
   return (
     <>
@@ -41,7 +43,16 @@ export const ProductCard = ({ products }: ProductCardProps) => {
 
             <section className="flex items-center justify-between mt-4">
               <span className="font-bold text-xl">$ {product?.price}</span>
-              <button className="flex items-center justify-center bg-blue-500 p-2 text-white rounded w-1/4 h-10 hover:bg-blue-600 font-bold cursor-pointer">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addProductShoppingCart({
+                    ...product,
+                    quantity: 1,
+                  });
+                }}
+                className="flex items-center justify-center bg-blue-500 p-2 text-white rounded w-1/4 h-10 hover:bg-blue-600 font-bold cursor-pointer"
+              >
                 <PlusIcon size={16} className="text-white font-extrabold" />
                 Add
               </button>
