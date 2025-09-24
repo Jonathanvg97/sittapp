@@ -1,11 +1,11 @@
-"use client";
-
-import { ProductCard } from "@/features/storeGeneral/components/productCard";
+import { ProductGeneralPage } from "@/features/storeGeneral/page/productGeneralPage";
+import { ToastContainer } from "react-toastify";
 
 export default function Home() {
   return (
     <>
-      <ProductCard />
+      <ToastContainer position="bottom-right" />
+      <ProductGeneralPage />;
     </>
   );
 }
