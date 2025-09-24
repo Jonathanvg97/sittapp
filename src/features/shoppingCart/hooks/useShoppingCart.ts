@@ -8,7 +8,7 @@ export const useShoppingCart = () => {
   //store
   const { products, setProducts } = shoppingCartStore();
 
-  //
+
   useEffect(() => {
     loadProductsFromDB();
   }, []);
