@@ -1,7 +1,7 @@
 export const ProductCardSkeleton = () => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-3  max-w-[80%] gap-6 justify-center mx-auto">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div className="ProductCardSkeleton grid grid-cols-1 sm:grid-cols-4 md:grid-cols-4   gap-6 justify-center mx-auto">
+      {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
           className="animate-pulse bg-white rounded-lg shadow-md p-4 h-96 flex flex-col justify-between"

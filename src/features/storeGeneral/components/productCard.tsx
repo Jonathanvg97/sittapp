@@ -12,11 +12,11 @@ export const ProductCard = ({ products }: ProductCardProps) => {
       {products?.map((product) => (
         <article
           key={product?.id}
-          className="ProductCard text-black w-full h-96 flex flex-col rounded-lg shadow-md bg-white hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+          className="ProductCard text-black w-full h-full flex flex-col rounded-lg shadow-md bg-white hover:shadow-lg transition-shadow duration-300 cursor-pointer "
         >
           <div className="w-full h-60 relative rounded-t-lg overflow-hidden">
             <Image
-              src={product.image}
+              src={product.images[0]}
               alt="Product Image"
               fill
               className="object-centerE rounded-t-lg"
@@ -29,7 +29,7 @@ export const ProductCard = ({ products }: ProductCardProps) => {
                 {product?.title}
               </h2>
               <p className="text-sm text-gray-500 line-clamp-2">
-                {product?.slug}
+                {product?.shippingInformation}
               </p>
             </section>
 
