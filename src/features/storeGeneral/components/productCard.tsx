@@ -1,3 +1,5 @@
+"use client";
+import React from "react";
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { Product } from "../types/product.interface";
